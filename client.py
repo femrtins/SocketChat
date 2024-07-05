@@ -2,7 +2,7 @@ import socket
 import threading
 import os
 
-CLIENT_IP = '127.0.0.1'
+SERVER_IP = '192.168.1.17'
 SERVER_PORT = 8000
 BUFFER = 1024
 
@@ -22,6 +22,7 @@ def receive_messages(client_socket):
         except:                            
             client_socket.close()                                       # Encerrar o programa do cliente (dá erro se não tiver isso)
             os._exit(0)  
+            
 
 def main():
     """
@@ -29,7 +30,8 @@ def main():
     Cria um objeto socket e o conecta ao servidor 
     """
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect((CLIENT_IP, SERVER_PORT))    
+    
+    client.connect((SERVER_IP, SERVER_PORT))    
     
     name = input("Nome do usuário: ")                               
     client.send(name.encode('utf-8'))                                   # Enviar nome de usuário para o servidor
