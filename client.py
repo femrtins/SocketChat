@@ -2,7 +2,7 @@ import socket
 import threading
 import os
 
-SERVER_IP = '192.168.1.17' # IP do servidor 
+SERVER_IP = '127.0.0.1' # IP do servidor 
 SERVER_PORT = 8000
 BUFFER = 1024
 

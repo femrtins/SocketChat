@@ -1,7 +1,8 @@
 import socket
 import threading
+import sys
 
-SERVER_IP = '192.168.1.5'   # IP do servidor 
+SERVER_IP = '0.0.0.0'   # IP do servidor 
 SERVER_PORT = 8000
 BUFFER = 1024
 
@@ -32,7 +33,10 @@ def handle_client(client_socket, client_address):
                 remove(client_socket)
                 break
             else:
-                broadcast(message, client_socket, 1)
+                if message:
+                    broadcast(message, client_socket, 1)
+                else:
+                    remove(client_socket)
         except:
             continue
 
@@ -44,12 +48,18 @@ def broadcast(message, client_socket, filter):
         message (string): mensagem que será enviada para os demais clientes
         client_socket (socket): objeto socket que representa a conexão com o cliente
     """
-    for client in names:                                        # Percorre todos os nomes no dicionario
+    
+    for client in names:                                     # Percorre todos os nomes no dicionario
         if client != client_socket:
-            if filter == 1:
-                client.send(f"{names[client_socket]}: {message}".encode('utf-8'))   # Envia a mensagem no estilo Nome: mensagem
-            elif filter == 2:
-                client.send(message.encode('utf-8'))
+            try:
+                if filter == 1:
+                    client.send(f"{names[client_socket]}: {message}".encode('utf-8'))   # Envia a mensagem no estilo Nome: mensagem
+                elif filter == 2:
+                    client.send(message.encode('utf-8'))
+            except:
+                remove(client)
+                       
+
                 
 def remove(client_socket):
     """
@@ -73,15 +83,21 @@ def main():
     Cria um objeto socket, faz o bind do socket com o endereço e porta 
     Executa 5 conexões simultâneas
     """
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((SERVER_IP, SERVER_PORT))
-    server.listen(5)
-    print("O servidor está aberto para a conexão...")
+    try:
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.bind((SERVER_IP, SERVER_PORT))
+        server.listen(5)
+        print("O servidor está aberto para a conexão...")
 
-    while True:
-        client_socket, client_address = server.accept()          # Aceitando conexões
-        print(f"Conexão estabelecida com {client_address}")
-        threading.Thread(target=handle_client, args=(client_socket, client_address)).start()    # Inicia uma nova thread que lida com esse cliente específico
-           
+        while True:
+            client_socket, client_address = server.accept()          # Aceitando conexões
+            print(f"Conexão estabelecida com {client_address}")
+            threading.Thread(target=handle_client, args=(client_socket, client_address)).start()    # Inicia uma nova thread que lida com esse cliente específico
+
+    except KeyboardInterrupt:
+        print("Encerrando o servidor...")
+        server.close()
+        sys.exit(0)
+
 if __name__ == "__main__":
     main()
